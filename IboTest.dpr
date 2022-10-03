@@ -13,7 +13,6 @@ var
 begin
   try
     conn := TIB_Connection.Create(nil);
-    //conn.Server := 'localhost/3051';
     conn.Database := 'CCARE';
     conn.Username := 'sysdba';                                              
     conn.Password := '******';
@@ -39,12 +38,15 @@ insert into types (id, name) values (char_to_uuid('AB000000-0000-0000-0000-00000
 *)
 
     lk.SQL.text := 'select id, name from types';
-    qry.SQL.Text := 'select id, name, type_id from names';
+    qry.SQL.Text := 'select id, name, type_id from names where id = :id';
 
-    lk.open;
+    lk.Open;
     lk.First;
 
-    qry.open;
+    qry.RequestLive := true;
+    qry.Prepare;
+    qry.ParamByName('id').AsInteger := 1;
+    qry.Open;
     qry.Edit;
     qry.FieldByName('name').AsString := 'zeus';
     qry.FieldByName('type_id').ColData := lk.FieldByName('id').ColData;
