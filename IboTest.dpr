@@ -8,29 +8,38 @@ uses
 
 var
   conn : TIB_Connection;
-  qry : TIB_Cursor;
+  qry : TIB_Query;
 
 begin
   try
     conn := TIB_Connection.Create(nil);
     conn.Database := 'CCARE';
-    conn.Username := 'sysdba';
+    conn.Username := 'sysdba';                                              
     conn.Password := '******';
     conn.Open;
 
-    qry := TIB_Cursor.Create(Nil);
+    qry := TIB_Query.Create(Nil);
     qry.IB_Connection := conn;
-//    qry.SQL.Text := 'select pat_id, full_name from patient where full_name like ''HUNT%'' ' +
-//      'union all select pat_id, full_name from patient where full_name like ''BAXTER%''';
 
-    qry.SQL.LoadFromFile('C:\Git\IboTest\test.sql');
+(*
+create table types (
+    id char(16) character set octets primary key, 
+    name varchar(50));
+create table names (
+    id int, 
+    name varchar(50), 
+    type_id char(16) character set octets,
+    constraint fk_values_type_id foreign key (type_id) references types (id));
 
-    qry.Open;
-    while not qry.Eof do
-    begin
-      writeln(qry.FieldByName('ix_result_no').AsString, #9, qry.FieldByName('patient_name').AsString);
-      qry.Next;
-    end;
+insert into types (id, name) values (char_to_uuid('AB000000-0000-0000-0000-000000000000'), 'foo');
+*)
+
+    qry.SQL.Text := 'update names set name = :name, type_id = :type_id where id = :id;';
+    qry.Prepare;
+    qry.Params.ByName('id').AsInteger := 1;
+    qry.Params.ByName('name').AsString := 'fred';
+    qry.Params.ByName('type_id').ColData := #$AB#10#0#0#0#0#0#0#0#0#0#0#0#0#0#0;
+    qry.Execute;
 
     Writeln('done!');
     Readln;
