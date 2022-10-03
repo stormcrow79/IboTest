@@ -25,19 +25,26 @@ begin
     qry.IB_Connection := conn;
 
 (*
+drop table names;
+drop table types;
+
 create table types (
-    id char(16) character set octets primary key, 
+    id char(16) character set octets primary key,
     name varchar(50));
 create table names (
-    id int, 
-    name varchar(50), 
+    id int,
+    name varchar(50),
     type_id char(16) character set octets,
     constraint fk_values_type_id foreign key (type_id) references types (id));
 
-insert into types (id, name) values (char_to_uuid('AB000000-0000-0000-0000-000000000000'), 'foo');
+insert into types (id, name) values (x'CD000000000000000000000000000000', 'bar');
+insert into types (id, name) values (x'AB000000000000000000000000000000', 'foo');
+select * from types;
+insert into names (id, name, type_id) values (1, 'eric', x'AB000000000000000000000000000000');
+select * from names;
 *)
 
-    lk.SQL.text := 'select id, name from types';
+    lk.SQL.text := 'select id, name from types order by name';
     qry.SQL.Text := 'select id, name, type_id from names where id = :id';
 
     lk.Open;
