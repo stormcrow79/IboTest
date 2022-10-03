@@ -14,8 +14,8 @@ begin
   try
     conn := TIB_Connection.Create(nil);
     conn.Database := 'CCARE';
-    conn.Username := 'sysdba';                                              
-    conn.Password := '******';
+    conn.Username := 'sysdba';
+    // set %ISC_PASSWORD%
     conn.Open;
 
     lk := TIB_Query.Create(Nil);
