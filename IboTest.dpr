@@ -37,10 +37,10 @@ create table names (
     type_id char(16) character set octets,
     constraint fk_values_type_id foreign key (type_id) references types (id));
 
-insert into types (id, name) values (x'CD000000000000000000000000000000', 'bar');
-insert into types (id, name) values (x'AB000000000000000000000000000000', 'foo');
+insert into types (id, name) values (x'CD00AB00000000000000000000000000', 'bar');
+insert into types (id, name) values (x'AB00CD00000000000000000000000000', 'foo');
 select * from types;
-insert into names (id, name, type_id) values (1, 'eric', x'AB000000000000000000000000000000');
+insert into names (id, name, type_id) values (1, 'eric', x'AB00CD00000000000000000000000000');
 select * from names;
 *)
 
