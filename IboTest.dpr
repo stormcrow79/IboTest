@@ -9,19 +9,46 @@ uses
 var
   conn : TIB_Connection;
   qry, lk : TIB_Query;
+  upd : TIB_Query;
 
 begin
   try
     conn := TIB_Connection.Create(nil);
     conn.Database := 'CCARE';
     conn.Username := 'sysdba';
-    // set %ISC_PASSWORD%
+    // set %ISC_PASSWORD% or conn.Password
     conn.Open;
 
-    lk := TIB_Query.Create(Nil);
+    upd := TIB_Query.Create(nil);
+    upd.IB_Connection := conn;
+    //upd.SQL.Text := 'select * from medication_request where medication_request_id = :mri';
+    //upd.SQL.Text := 'select * from medication_request where medication_request_id = char_to_uuid(:mris)';
+    //upd.SQL.Text := 'select medication_request_id, status from medication_request where medication_request_id = char_to_uuid(''73148719-5C41-4BF2-B4AC-278CD3074113'')';
+    upd.SQL.Text := 'select medication_request_id, status from medication_request where medication_request_id = x''731487195C414BF2B4AC278CD3074113''';
+    upd.RequestLive := True;
+    upd.Prepare;
+    //upd.ParamByName('mri').Trimming := ctNone;
+    //upd.ParamByName('mri').ColData := #$73#$14#$87#$19#$5C#$41#$4B#$F2#$B4#$AC#$27#$8C#$D3#$07#$41#$13;
+    //upd.ParamByName('mris').AsString := '73148719-5C41-4BF2-B4AC-278CD3074113';
+    upd.Open;
+    upd.First;
+    if upd.EOF then
+    begin
+      writeln('nope');
+      exit;
+    end;
+
+    Writeln(Format('STATUS = %d', [Integer(upd.FieldValues['STATUS'])]));
+    upd.Edit;
+    upd.FieldValues['STATUS'] := 3;
+    upd.Post;
+
+    exit;
+
+    lk := TIB_Query.Create(nil);
     lk.IB_Connection := conn;
 
-    qry := TIB_Query.Create(Nil);
+    qry := TIB_Query.Create(nil);
     qry.IB_Connection := conn;
 
 (*
