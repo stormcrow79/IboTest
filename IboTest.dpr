@@ -6,13 +6,33 @@ uses
   SysUtils,
   IB_Components;
 
+type
+  TGuidProvider = class
+    procedure GetText(Sender: TIB_Column; var AValue: string);
+    procedure SetText(Sender: TIB_Column; var AValue: string);
+  end;
+
+procedure TGuidProvider.GetText(Sender: TIB_Column; var AValue: string);
+begin
+  AValue := Sender.ColData;
+end;
+
+procedure TGuidProvider.SetText(Sender: TIB_Column; var AValue: string);
+begin
+  Sender.ColData := AValue;
+end;
+
 var
-  conn : TIB_Connection;
-  qry, lk : TIB_Query;
-  upd : TIB_Query;
+  conn: TIB_Connection;
+  qry, lk: TIB_Query;
+
+  upd: TIB_Query;
+  hook: TGuidProvider;
 
 begin
   try
+    hook := TGuidProvider.Create;
+
     conn := TIB_Connection.Create(nil);
     conn.Database := 'CCARE';
     conn.Username := 'sysdba';
@@ -21,15 +41,15 @@ begin
 
     upd := TIB_Query.Create(nil);
     upd.IB_Connection := conn;
-    //upd.SQL.Text := 'select * from medication_request where medication_request_id = :mri';
-    //upd.SQL.Text := 'select * from medication_request where medication_request_id = char_to_uuid(:mris)';
-    //upd.SQL.Text := 'select medication_request_id, status from medication_request where medication_request_id = char_to_uuid(''73148719-5C41-4BF2-B4AC-278CD3074113'')';
-    upd.SQL.Text := 'select medication_request_id, status from medication_request where medication_request_id = x''731487195C414BF2B4AC278CD3074113''';
+    upd.SQL.Text := 'select * from medication_request where medication_request_id = :mri';
     upd.RequestLive := True;
     upd.Prepare;
-    //upd.ParamByName('mri').Trimming := ctNone;
-    //upd.ParamByName('mri').ColData := #$73#$14#$87#$19#$5C#$41#$4B#$F2#$B4#$AC#$27#$8C#$D3#$07#$41#$13;
-    //upd.ParamByName('mris').AsString := '73148719-5C41-4BF2-B4AC-278CD3074113';
+    with upd.FieldByName('medication_request_id') do
+    begin
+      OnGetText := hook.GetText;
+      OnSetText := hook.SetText;
+    end;
+    upd.ParamByName('mri').ColData := #$73#$14#$87#$19#$5C#$41#$4B#$F2#$B4#$AC#$27#$8C#$D3#$07#$41#$13;
     upd.Open;
     upd.First;
     if upd.EOF then
@@ -40,7 +60,10 @@ begin
 
     Writeln(Format('STATUS = %d', [Integer(upd.FieldValues['STATUS'])]));
     upd.Edit;
-    upd.FieldValues['STATUS'] := 3;
+    if Integer(upd.FieldValues['STATUS']) = 1 then
+      upd.FieldValues['STATUS'] := 3
+    else
+      upd.FieldValues['STATUS'] := 1;
     upd.Post;
 
     exit;
