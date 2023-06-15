@@ -15,7 +15,7 @@ begin
     conn := TIB_Connection.Create(nil);
     conn.Database := 'CCARE';
     conn.Username := 'sysdba';
-    conn.Password := '******';
+    conn.Password := '********';
     conn.Open;
 
     qry := TIB_Cursor.Create(Nil);
@@ -26,9 +26,10 @@ begin
     qry.SQL.LoadFromFile('C:\Git\IboTest\test.sql');
 
     qry.Open;
+    writeln(qry.Fields[0].FieldName);
     while not qry.Eof do
     begin
-      writeln(qry.FieldByName('ix_result_no').AsString, #9, qry.FieldByName('patient_name').AsString);
+      writeln(qry.Fields[0].AsString);
       qry.Next;
     end;
 
