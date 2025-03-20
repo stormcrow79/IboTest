@@ -4,18 +4,26 @@ program IboTest;
 
 uses
   SysUtils,
-  IB_Components;
+  IB_Components, IB_Session;
 
 var
   conn : TIB_Connection;
   qry : TIB_Cursor;
 
 begin
+  if ParamCount < 4 then
+  begin
+    Writeln('Usage: IboTest.exe [server] [path] [username] [password]');
+    exit;
+  end;
+
   try
     conn := TIB_Connection.Create(nil);
-    conn.Database := 'CCARE';
-    conn.Username := 'sysdba';
-    conn.Password := '********';
+    conn.Server := ParamStr(1);
+    conn.Path := ParamStr(2);
+    conn.Username := ParamStr(3);
+    conn.Password := ParamStr(4);
+    conn.Protocol := cpTCP_IP;
     conn.Open;
 
     qry := TIB_Cursor.Create(Nil);
@@ -23,7 +31,7 @@ begin
 //    qry.SQL.Text := 'select pat_id, full_name from patient where full_name like ''HUNT%'' ' +
 //      'union all select pat_id, full_name from patient where full_name like ''BAXTER%''';
 
-    qry.SQL.LoadFromFile('C:\Git\IboTest\test.sql');
+    qry.SQL.LoadFromFile('.\test.sql');
 
     qry.Open;
     writeln(qry.Fields[0].FieldName);
